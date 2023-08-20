@@ -5,74 +5,6 @@
 #include <vector>
 #include <iterator>
 
-// DrawableObject ------------------------------------------------------------------------------------------
-
-DrawableObject::DrawableObject() {
-    // Размер ректа у текстуры равен размеру первоначальной текстуры, поэтому невозможно впоследствии поменять размер текстуры
-    setTextureByPath("assets\\placeholder.png");
-}
-
-void DrawableObject::setTextureByPath(std::string path) {
-    if (!this->texture.loadFromFile(path)) {
-        std::cerr << "texture loading error";
-    }
-    this->setTexture(texture, true);
-    this->setScale(SPRITE_SCALE);
-}
-
-// MovableObject -------------------------------------------------------------------------------------------
-
-MovableObject::MovableObject() : DrawableObject() {
-    this->setMovingDirectionToNone();
-}
-
-void MovableObject::changeMovingDirection(sf::Keyboard::Key key_code) {
-    switch (key_code) {
-    case sf::Keyboard::Up:
-        this->direction = Direction::Up;
-        this->normalized_moving_vector.x = 0;
-        this->normalized_moving_vector.y = -1;
-        break;
-    case sf::Keyboard::Right:
-        this->direction = Direction::Right;
-        this->normalized_moving_vector.x = 1;
-        this->normalized_moving_vector.y = 0;
-        break;
-    case sf::Keyboard::Down:
-        this->direction = Direction::Down;
-        this->normalized_moving_vector.x = 0;
-        this->normalized_moving_vector.y = 1;
-        break;
-    case sf::Keyboard::Left:
-        this->direction = Direction::Left;
-        this->normalized_moving_vector.x = -1;
-        this->normalized_moving_vector.y = 0;
-        break;
-    case sf::Keyboard::Space: // временно - удалить
-        this->setMovingDirectionToNone();
-        break;
-    }
-}
-
-void MovableObject::setMovingDirectionToNone() {
-    this->direction = Direction::None;
-    this->normalized_moving_vector.x = 0;
-    this->normalized_moving_vector.y = 0;
-}
-
-void MovableObject::defineCell() {
-    int x = (((this->getPosition().x) + TILE_SIDE_SIZE / 2 + TILE_SIDE_SIZE) / TILE_SIDE_SIZE);
-    int y = (((this->getPosition().y) + TILE_SIDE_SIZE / 2 + TILE_SIDE_SIZE) / TILE_SIDE_SIZE);
-    current_cell = Game::getCell(x - 1, y - 1);
-}
-
-// MapObject -----------------------------------------------------------------------------------------------
-
-MapObject::MapObject() {
-    this->can_walk_trough = true;
-    this->setTextureByPath("assets\\empty.png");
-}
-
 // Game ----------------------------------------------------------------------------------------------------
 
 Game::Game() {
@@ -83,12 +15,15 @@ Game::Game() {
 }
 
 void Game::windowInit() {
-    this->window.create(sf::VideoMode((GRID_SIDE_X + 2) * TILE_SIDE_SIZE, (GRID_SIDE_Y + 2) * TILE_SIDE_SIZE), L"Новый проект", sf::Style::None);
+    //this->window.create(sf::VideoMode((GRID_SIDE_X + 2) * TILE_SIDE_SIZE, (GRID_SIDE_Y + 2) * TILE_SIDE_SIZE), L"Новый проект", sf::Style::None);
+    this->window.create(sf::VideoMode((GRID_SIDE_X + 2) * TILE_SIDE_SIZE, (GRID_SIDE_Y + 2) * TILE_SIDE_SIZE), L"Новый проект");
 }
 
 void Game::spritesInit() {
     this->player.setTextureByPath("assets\\f.png");
     this->player.setPosition((2 * TILE_SIDE_SIZE), (2 * TILE_SIDE_SIZE));
+    this->ghost.setTextureByPath("assets\\ghost.png");
+    this->ghost.setPosition((4 * TILE_SIDE_SIZE), (4 * TILE_SIDE_SIZE));
 }
 
 void Game::mapInit() {
@@ -105,22 +40,14 @@ void Game::mapInit() {
         }
     }
 
-    this->getCell(1, 1)->setTextureByPath("assets\\wall.png");
-    this->getCell(1, 1)->can_walk_trough = false;
-    this->getCell(2, 1)->setTextureByPath("assets\\wall.png");
-    this->getCell(2, 1)->can_walk_trough = false;
-    this->getCell(3, 1)->setTextureByPath("assets\\wall.png");
-    this->getCell(3, 1)->can_walk_trough = false;
-    this->getCell(2, 3)->setTextureByPath("assets\\wall.png");
-    this->getCell(2, 3)->can_walk_trough = false;
-    this->getCell(4, 1)->setTextureByPath("assets\\wall.png");
-    this->getCell(4, 1)->can_walk_trough = false;
-    this->getCell(4, 2)->setTextureByPath("assets\\wall.png");
-    this->getCell(4, 2)->can_walk_trough = false;
-    this->getCell(4, 3)->setTextureByPath("assets\\wall.png");
-    this->getCell(4, 3)->can_walk_trough = false;
-    this->getCell(4, 4)->setTextureByPath("assets\\wall.png");
-    this->getCell(4, 4)->can_walk_trough = false;
+    for (int i = 1; i < GRID_SIDE_X + 1; ++i) {
+        this->getCell(i, 1)->setTextureByPath("assets\\wall.png");
+        this->getCell(i, 1)->can_walk_trough = false;
+    }
+    for (int i = 1; i < GRID_SIDE_Y + 1; ++i) {
+        this->getCell(i, GRID_SIDE_Y)->setTextureByPath("assets\\wall.png");
+        this->getCell(i, GRID_SIDE_Y)->can_walk_trough = false;
+    }
 
     for (int i = 0; i < (GRID_SIDE_X + 2); ++i) {
         this->map[i].setTextureByPath("assets\\empty1.png");
@@ -162,8 +89,12 @@ void Game::update() {
 
 void Game::inputHandler(sf::Keyboard::Key key_code) {
     switch (key_code) {
-    case sf::Keyboard::Escape: this->window.close(); break;
-    default: this->player.changeMovingDirection(key_code); break;
+        case sf::Keyboard::Escape:
+            this->window.close();
+            break;
+        default:
+            this->player.changeDirectionByInput(key_code);
+            break;
     }
 }
 
@@ -174,21 +105,18 @@ void Game::moveInCurrentDirection(MovableObject& obj) {
     obj.defineCell();
 }
 
-sf::Vector2i Game::defineCellByCords(float x, float y) {
+sf::Vector2i Game::defineCellByCoords(float x, float y) {
     return sf::Vector2i(
         x = ((x + (float)TILE_SIDE_SIZE) / (float)TILE_SIDE_SIZE) - 1.f,
         y = ((y + (float)TILE_SIDE_SIZE) / (float)TILE_SIDE_SIZE) - 1.f);
 }
 
 MapObject* Game::getCell(int x, int y) {
-    //if ((x < 1 || x > GRID_SIDE_X) || (y < 1 || y > GRID_SIDE_Y)) {
-    //    throw "Got index out of range while executing getCell()";
-    //}
-    return &(map[(y) * (GRID_SIDE_X + 2) + x]);
+    return &map[(y) * (GRID_SIDE_X + 2) + x];
 }
 
 void Game::checkCollisions(MovableObject& obj) {
-    MapObject* cells_to_check_collisions[8]{
+    MapObject* cells_to_check_collisions[8] {
         getCell(obj.current_cell->x, obj.current_cell->y - 1),
         getCell(obj.current_cell->x + 1, obj.current_cell->y - 1),
         getCell(obj.current_cell->x + 1, obj.current_cell->y),
@@ -209,17 +137,16 @@ void Game::checkCollisions(MovableObject& obj) {
 
 void Game::checkTransition(MovableObject& obj) {
     if (obj.current_cell->x == 0 || obj.current_cell->x == GRID_SIDE_X + 1) {
-        bool modifiactor = obj.current_cell->x;
-        obj.setPosition((GRID_SIDE_X - obj.current_cell->x + (modifiactor * 2)) * TILE_SIDE_SIZE - ((obj.normalized_moving_vector.x * TILE_SIDE_SIZE / 2) - obj.normalized_moving_vector.x), obj.getPosition().y);
+        bool modifier = obj.current_cell->x;
+        obj.setPosition((GRID_SIDE_X - obj.current_cell->x + (modifier * 2)) * TILE_SIDE_SIZE - ((obj.normalized_moving_vector.x * TILE_SIDE_SIZE / 2) - obj.normalized_moving_vector.x), obj.getPosition().y);
         obj.defineCell();
     }
     if (obj.current_cell->y == 0 || obj.current_cell->y == GRID_SIDE_Y + 1) {
-        bool modifiactor = obj.current_cell->y;
-        obj.setPosition(obj.getPosition().x, (GRID_SIDE_Y - obj.current_cell->y + (modifiactor * 2)) * TILE_SIDE_SIZE - ((obj.normalized_moving_vector.y * TILE_SIDE_SIZE / 2) - obj.normalized_moving_vector.y));
+        bool modifier = obj.current_cell->y;
+        obj.setPosition(obj.getPosition().x, (GRID_SIDE_Y - obj.current_cell->y + (modifier * 2)) * TILE_SIDE_SIZE - ((obj.normalized_moving_vector.y * TILE_SIDE_SIZE / 2) - obj.normalized_moving_vector.y));
         obj.defineCell();
     }
 }
-
 
 void Game::drawPlayableTiles() {
     for (MapObject* tile : playable_tiles) {

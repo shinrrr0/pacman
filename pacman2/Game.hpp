@@ -35,6 +35,7 @@ public:
 
 class MapObject : public DrawableObject {
 public:
+    bool is_border_cell;
     bool can_walk_trough;
     int x;
     int y;
@@ -49,9 +50,29 @@ public:
     MapObject* current_cell;
 
     MovableObject();
-    void changeMovingDirection(sf::Keyboard::Key key_code);
+    void changeDirectionByInput(sf::Keyboard::Key key_code);
+    void changeDirection(Direction direction);
+    void changeDirection(int direction);
     void setMovingDirectionToNone();
     void defineCell();
+};
+
+class Ghost : public MovableObject {
+private:
+    MapObject* target_cell;
+    bool (Ghost::*checkTargetFunc)();
+    bool(Ghost::* targetFunctions[4])(void);
+    bool checkTargetCellOnTop();
+    bool checkTargetCellOnRight();
+    bool checkTargetCellOnBottom();
+    bool checkTargetCellOnLeft();
+    bool pointerPlaceholder();
+    
+    
+public:
+    Ghost();
+    void setTargetCell(MapObject* target_cell);
+    void checkTargetCell();
 };
 
 class Game {
@@ -68,7 +89,8 @@ public:
     float delta_time;
     sf::RenderWindow window;
     static inline MovableObject player;
-    static inline std::array<MapObject, (GRID_SIDE_X + 2)* (GRID_SIDE_Y + 2)> map{};
+    static inline Ghost ghost;
+    static inline std::array<MapObject, (GRID_SIDE_X + 2) * (GRID_SIDE_Y + 2)> map{};
     std::vector<MapObject*> playable_tiles{};
     std::vector<MapObject*> border_tiles{};
     sf::Text text;
@@ -79,15 +101,13 @@ public:
     void moveInCurrentDirection(MovableObject& obj);
     //-------------------------------------------------------------------
     // этот блок нужно будет вынести в отдельный вспомогательный класс
-    static sf::Vector2i defineCellByCords(float x, float y);
+    static sf::Vector2i defineCellByCoords(float x, float y);
     static MapObject* getCell(int x, int y); // - по координатам клетки
     //-------------------------------------------------------------------
     void checkCollisions(MovableObject& obj);
     void checkTransition(MovableObject& obj);
     void drawPlayableTiles();
     void drawBorderTiles();
-
-
 };
 
 #endif

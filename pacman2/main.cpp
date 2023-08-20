@@ -5,6 +5,7 @@
 int main() {
     Game *game = new Game;
     game->window.setFramerateLimit(144);
+    //game->ghost.setTargetCell(Game::getCell(4, 6));
 
     while (game->window.isOpen()) {
         sf::Event event;
@@ -20,19 +21,23 @@ int main() {
         game->update();
 
         game->moveInCurrentDirection(game->player);
+        //game->moveInCurrentDirection(game->ghost);
 
         game->checkTransition(game->player);
         game->checkCollisions(game->player);
         
-        game->window.draw(game->player);// - временно
+        //game->ghost.checkTargetCell();
 
+        game->window.draw(game->player);// - временно
+        //game->window.draw(game->ghost);// - временно
         game->drawBorderTiles();
 
-        game->text.setString(std::to_string(game->player.current_cell->x) + ' ' + std::to_string(game->player.current_cell->y));
-        //sf::Vector2i pos = game->defineCellByCords(game->player.getPosition().x, game->player.getPosition().y);
+
+        //game->text.setString(std::to_string(game->player.current_cell->x) + ' ' + std::to_string(game->player.current_cell->y));
+        //sf::Vector2i pos = game->defineCellByCoords(game->player.getPosition().x, game->player.getPosition().y);
         //game->text.setString(std::to_string(pos.x) + ' ' + std::to_string(pos.y));
         //game->text.setString(std::to_string(1 / game->delta_time)); // ФПС метр
-        game->window.draw(game->text);
+        //game->window.draw(game->text);
         game->window.display();
     }
 
