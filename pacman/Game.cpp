@@ -1,4 +1,4 @@
-п»ї#pragma warning( disable : 4244 ) 
+#pragma warning( disable : 4244 ) 
 #include "Game.hpp"
 #include <iostream>
 #include <string>
@@ -15,15 +15,17 @@ Game::Game() {
 }
 
 void Game::windowInit() {
-    //this->window.create(sf::VideoMode((GRID_SIDE_X + 2) * TILE_SIDE_SIZE, (GRID_SIDE_Y + 2) * TILE_SIDE_SIZE), L"РќРѕРІС‹Р№ РїСЂРѕРµРєС‚", sf::Style::None);
-    this->window.create(sf::VideoMode((GRID_SIDE_X + 2) * TILE_SIDE_SIZE, (GRID_SIDE_Y + 2) * TILE_SIDE_SIZE), L"РќРѕРІС‹Р№ РїСЂРѕРµРєС‚");
+    //this->window.create(sf::VideoMode((GRID_SIDE_X + 2) * TILE_SIDE_SIZE, (GRID_SIDE_Y + 2) * TILE_SIDE_SIZE), L"Новый проект", sf::Style::None);
+    this->window.create(sf::VideoMode((GRID_SIDE_X + 2) * TILE_SIDE_SIZE, (GRID_SIDE_Y + 2) * TILE_SIDE_SIZE), L"Новый проект");
 }
 
 void Game::spritesInit() {
     this->player.setTextureByPath("assets\\f.png");
     this->player.setPosition((2 * TILE_SIDE_SIZE), (2 * TILE_SIDE_SIZE));
+    this->player.map = &map;
     this->ghost.setTextureByPath("assets\\ghost.png");
     this->ghost.setPosition((4 * TILE_SIDE_SIZE), (4 * TILE_SIDE_SIZE));
+    this->ghost.map = &map;
 }
 
 void Game::mapInit() {
@@ -52,18 +54,22 @@ void Game::mapInit() {
     for (int i = 0; i < (GRID_SIDE_X + 2); ++i) {
         this->map[i].setTextureByPath("assets\\empty1.png");
         this->border_tiles.push_back(&map[i]);
+        map[i].is_border_cell = true;
     }
     for (int i = (GRID_SIDE_X + 2) * (GRID_SIDE_Y + 1); i < (GRID_SIDE_X + 2) * (GRID_SIDE_Y + 2); ++i) {
         this->map[i].setTextureByPath("assets\\empty1.png");
         this->border_tiles.push_back(&map[i]);
+        map[i].is_border_cell = true;
     }
     for (int i = 1; i < (GRID_SIDE_Y + 1); ++i) {
         this->map[i * (GRID_SIDE_X + 2)].setTextureByPath("assets\\empty1.png");
         this->border_tiles.push_back(&map[i * (GRID_SIDE_X + 2)]);
+        map[i * (GRID_SIDE_X + 2)].is_border_cell = true;
     }
     for (int i = 2; i < GRID_SIDE_Y + 2; ++i) {
         this->map[i * (GRID_SIDE_X + 2) - 1].setTextureByPath("assets\\empty1.png");
         this->border_tiles.push_back(&map[i * (GRID_SIDE_X + 2) - 1]);
+        map[i * (GRID_SIDE_X + 2) - 1].is_border_cell = true;
     }
 
     int tile_n = 0;
@@ -73,6 +79,58 @@ void Game::mapInit() {
             this->playable_tiles.push_back(&map[index]);
         }
         ++tile_n;
+    }
+
+    int count = 0;
+    for (MapObject& cell : map) {
+        count = 0;
+        if (cell.is_border_cell) {
+            int index = 0;
+            if ((cell.x == 0 || cell.x == GRID_SIDE_X + 1) && (cell.y == 0 || cell.y == GRID_SIDE_Y + 1)) {
+                cell.connected_with.resize(0);
+                continue;
+            }
+            if (cell.x == 0 || cell.x == GRID_SIDE_X + 1) {
+                bool modifier = cell.x;
+                number = GRID_SIDE_X - cell.x + (modifier * 2);
+                if (getCell(number, cell.y)->can_walk_trough) {
+                    cell.connected_with.push_back(getCell(number, cell.y));
+                    ++count;
+                }
+            }
+            if (cell.y == 0 || cell.y == GRID_SIDE_Y + 1) {
+                bool modifier = cell.y;
+                number = GRID_SIDE_Y - cell.y + (modifier * 2);
+                if (getCell(cell.x, number)->can_walk_trough) {
+                    cell.connected_with.push_back(getCell(cell.x, number));
+                    ++count;
+                }
+            }
+            cell.connected_with.resize(count);
+        }
+        else {
+            if (!cell.can_walk_trough) {
+                cell.connected_with.resize(0); 
+                continue; 
+            }
+            if (getTopCell(&cell)->can_walk_trough) {
+                cell.connected_with.push_back(getTopCell(&cell));
+                ++count;
+            }
+            if (getRightCell(&cell)->can_walk_trough) {
+                cell.connected_with.push_back(getRightCell(&cell));
+                ++count;
+            }
+            if (getBottomCell(&cell)->can_walk_trough) { 
+                cell.connected_with.push_back(getBottomCell(&cell));
+                ++count;
+            }
+            if (getLeftCell(&cell)->can_walk_trough) {
+                cell.connected_with.push_back(getLeftCell(&cell));
+                ++count;
+            }
+            cell.connected_with.resize(count);
+        }
     }
 }
 
@@ -89,12 +147,12 @@ void Game::update() {
 
 void Game::inputHandler(sf::Keyboard::Key key_code) {
     switch (key_code) {
-        case sf::Keyboard::Escape:
-            this->window.close();
-            break;
-        default:
-            this->player.changeDirectionByInput(key_code);
-            break;
+    case sf::Keyboard::Escape:
+        this->window.close();
+        break;
+    default:
+        this->player.changeDirectionByInput(key_code);
+        break;
     }
 }
 
@@ -112,11 +170,24 @@ sf::Vector2i Game::defineCellByCoords(float x, float y) {
 }
 
 MapObject* Game::getCell(int x, int y) {
-    return &map[(y) * (GRID_SIDE_X + 2) + x];
+    return &(map[(y) * (GRID_SIDE_X + 2) + x]);
 }
 
+MapObject* Game::getTopCell(MapObject* cell) {
+    return getCell(cell->x, cell->y - 1);
+};
+MapObject* Game::getRightCell(MapObject* cell) {
+    return getCell(cell->x + 1, cell->y);
+};
+MapObject* Game::getBottomCell(MapObject* cell) {
+    return getCell(cell->x, cell->y + 1);
+};
+MapObject* Game::getLeftCell(MapObject* cell) {
+    return getCell(cell->x - 1, cell->y);
+};
+
 void Game::checkCollisions(MovableObject& obj) {
-    MapObject* cells_to_check_collisions[8] {
+    MapObject* cells_to_check_collisions[8]{
         getCell(obj.current_cell->x, obj.current_cell->y - 1),
         getCell(obj.current_cell->x + 1, obj.current_cell->y - 1),
         getCell(obj.current_cell->x + 1, obj.current_cell->y),

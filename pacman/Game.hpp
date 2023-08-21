@@ -10,6 +10,8 @@
 #ifndef __GAME_HPP__
 #define __GAME_HPP__ 
 
+
+
 // функции - camelCase
 // поля - snake_case
 // классы, структуры и т.п - PascalCase
@@ -35,8 +37,10 @@ public:
 
 class MapObject : public DrawableObject {
 public:
+    bool is_transition_cell;
     bool is_border_cell;
     bool can_walk_trough;
+    std::vector<MapObject*> connected_with;
     int x;
     int y;
 
@@ -48,6 +52,7 @@ public:
     sf::Vector2i normalized_moving_vector;
     Direction direction;
     MapObject* current_cell;
+    std::array<MapObject, (GRID_SIDE_X + 2)* (GRID_SIDE_Y + 2)>* map;
 
     MovableObject();
     void changeDirectionByInput(sf::Keyboard::Key key_code);
@@ -60,15 +65,15 @@ public:
 class Ghost : public MovableObject {
 private:
     MapObject* target_cell;
-    bool (Ghost::*checkTargetFunc)();
-    bool(Ghost::* targetFunctions[4])(void);
+    bool (Ghost::* checkTargetFunc)();
+    bool (Ghost::* targetFunctions[4])(void);
     bool checkTargetCellOnTop();
     bool checkTargetCellOnRight();
     bool checkTargetCellOnBottom();
     bool checkTargetCellOnLeft();
     bool pointerPlaceholder();
-    
-    
+
+
 public:
     Ghost();
     void setTargetCell(MapObject* target_cell);
@@ -88,9 +93,9 @@ private:
 public:
     float delta_time;
     sf::RenderWindow window;
-    static inline MovableObject player;
-    static inline Ghost ghost;
-    static inline std::array<MapObject, (GRID_SIDE_X + 2) * (GRID_SIDE_Y + 2)> map{};
+    MovableObject player;
+    Ghost ghost;
+    std::array<MapObject, (GRID_SIDE_X + 2) * (GRID_SIDE_Y + 2)> map{};
     std::vector<MapObject*> playable_tiles{};
     std::vector<MapObject*> border_tiles{};
     sf::Text text;
@@ -101,8 +106,12 @@ public:
     void moveInCurrentDirection(MovableObject& obj);
     //-------------------------------------------------------------------
     // этот блок нужно будет вынести в отдельный вспомогательный класс
-    static sf::Vector2i defineCellByCoords(float x, float y);
-    static MapObject* getCell(int x, int y); // - по координатам клетки
+    sf::Vector2i defineCellByCoords(float x, float y);
+    MapObject* getCell(int x, int y); // - по координатам клетки
+    MapObject* getTopCell(MapObject* cell);
+    MapObject* getRightCell(MapObject* cell);
+    MapObject* getBottomCell(MapObject* cell);
+    MapObject* getLeftCell(MapObject* cell);
     //-------------------------------------------------------------------
     void checkCollisions(MovableObject& obj);
     void checkTransition(MovableObject& obj);

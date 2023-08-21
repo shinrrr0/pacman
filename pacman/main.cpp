@@ -3,16 +3,21 @@
 
 
 int main() {
-    Game *game = new Game;
+    Game* game = new Game;
     game->window.setFramerateLimit(144);
-    //game->ghost.setTargetCell(Game::getCell(4, 6));
+
+    /*game->ghost.setTargetCell(game->getCell(4, 6));*/
+
+    //for (auto elem: game->getCell(5, 5)->connected_with) {
+    //    elem->setTextureByPath("assets\\target.png");
+    //}
 
     while (game->window.isOpen()) {
         sf::Event event;
         while (game->window.pollEvent(event)) {
             switch (event.type) {
-                case sf::Event::Closed: game->window.close(); break;
-                case sf::Event::KeyPressed: game->inputHandler(event.key.code); break;
+            case sf::Event::Closed: game->window.close(); break;
+            case sf::Event::KeyPressed: game->inputHandler(event.key.code); break;
             }
         }
         game->window.clear();
@@ -21,23 +26,23 @@ int main() {
         game->update();
 
         game->moveInCurrentDirection(game->player);
-        //game->moveInCurrentDirection(game->ghost);
+        game->moveInCurrentDirection(game->ghost);
 
         game->checkTransition(game->player);
         game->checkCollisions(game->player);
-        
-        //game->ghost.checkTargetCell();
+
+        game->ghost.checkTargetCell();
 
         game->window.draw(game->player);// - временно
-        //game->window.draw(game->ghost);// - временно
+        game->window.draw(game->ghost);// - временно
         game->drawBorderTiles();
 
 
-        //game->text.setString(std::to_string(game->player.current_cell->x) + ' ' + std::to_string(game->player.current_cell->y));
+        game->text.setString(std::to_string(game->player.current_cell->x) + ' ' + std::to_string(game->player.current_cell->y));
         //sf::Vector2i pos = game->defineCellByCoords(game->player.getPosition().x, game->player.getPosition().y);
         //game->text.setString(std::to_string(pos.x) + ' ' + std::to_string(pos.y));
         //game->text.setString(std::to_string(1 / game->delta_time)); // ФПС метр
-        //game->window.draw(game->text);
+        game->window.draw(game->text);
         game->window.display();
     }
 
