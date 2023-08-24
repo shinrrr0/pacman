@@ -35,6 +35,53 @@ void Ghost::checkTargetCell() {
     this->setPosition(target_cell->getPosition());
 }
 
+//GraphNode* Ghost::getNodeByCell(MapObject* cell) {
+//    for (GraphNode node : graph) {
+//        if (node.cell == cell) {
+//            return &node;
+//        }
+//    }
+//    return nullptr;
+//}
+
+void Ghost::findPath(MapObject* start_node, MapObject* goal_node) {
+
+    std::unordered_set<MapObject*> reachable;
+    std::unordered_set<MapObject*> new_reachable;
+    std::unordered_set<MapObject*> explored;
+
+    start_node->cost = 0;
+    reachable.insert(start_node);
+    
+    MapObject* node;
+
+    //while (!reachable.empty()) {
+    //    node = chooseNode(reachable);
+
+    //    if (node == goal_node) { return; }
+    //    reachable.erase(node);
+    //    explored.insert(node);
+
+    //    new_reachable.clear();
+
+    //    for (MapObject* new_node : node->connected_with) {
+    //        if (!Game::in(new_node, explored)) {
+    //            new_reachable.insert(new_node);
+    //        }
+    //    }
+
+    //    for (MapObject* adjacent : new_reachable) {
+    //        if (!Game::in(adjacent, reachable)) {
+    //            reachable.insert(adjacent);
+    //        }
+    //        if (node->cost + 1 < adjacent->cost) {
+    //            adjacent->previous = node;
+    //            adjacent->cost = node->cost + 1;
+    //        }
+    //    }
+    //}
+};
+
 bool Ghost::checkTargetCellOnTop() {
     return static_cast<int>(this->getPosition().y) == static_cast<int>(target_cell->getPosition().y) || static_cast<int>(this->getPosition().y) < static_cast<int>(target_cell->getPosition().y);
 }

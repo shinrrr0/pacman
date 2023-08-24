@@ -8,10 +8,10 @@
 // Game ----------------------------------------------------------------------------------------------------
 
 Game::Game() {
-    spritesInit();
-    mapInit();
     windowInit();
+    mapInit();
     textInit();
+    spritesInit();
 }
 
 void Game::windowInit() {
@@ -23,9 +23,12 @@ void Game::spritesInit() {
     this->player.setTextureByPath("assets\\f.png");
     this->player.setPosition((2 * TILE_SIDE_SIZE), (2 * TILE_SIDE_SIZE));
     this->player.map = &map;
+    this->player.defineCell();
+    
     this->ghost.setTextureByPath("assets\\ghost.png");
     this->ghost.setPosition((4 * TILE_SIDE_SIZE), (4 * TILE_SIDE_SIZE));
     this->ghost.map = &map;
+    this->ghost.defineCell();
 }
 
 void Game::mapInit() {
@@ -42,14 +45,16 @@ void Game::mapInit() {
         }
     }
 
+    //------------------------------------------------------------------------------------------
     for (int i = 1; i < GRID_SIDE_X + 1; ++i) {
         this->getCell(i, 1)->setTextureByPath("assets\\wall.png");
         this->getCell(i, 1)->can_walk_trough = false;
     }
-    for (int i = 1; i < GRID_SIDE_Y + 1; ++i) {
+    for (int i = 1; i < GRID_SIDE_X + 1; ++i) {
         this->getCell(i, GRID_SIDE_Y)->setTextureByPath("assets\\wall.png");
         this->getCell(i, GRID_SIDE_Y)->can_walk_trough = false;
     }
+    //------------------------------------------------------------------------------------------
 
     for (int i = 0; i < (GRID_SIDE_X + 2); ++i) {
         this->map[i].setTextureByPath("assets\\empty1.png");
@@ -81,9 +86,7 @@ void Game::mapInit() {
         ++tile_n;
     }
 
-    int count = 0;
     for (MapObject& cell : map) {
-        count = 0;
         if (cell.is_border_cell) {
             int index = 0;
             if ((cell.x == 0 || cell.x == GRID_SIDE_X + 1) && (cell.y == 0 || cell.y == GRID_SIDE_Y + 1)) {
@@ -95,7 +98,6 @@ void Game::mapInit() {
                 number = GRID_SIDE_X - cell.x + (modifier * 2);
                 if (getCell(number, cell.y)->can_walk_trough) {
                     cell.connected_with.push_back(getCell(number, cell.y));
-                    ++count;
                 }
             }
             if (cell.y == 0 || cell.y == GRID_SIDE_Y + 1) {
@@ -103,10 +105,8 @@ void Game::mapInit() {
                 number = GRID_SIDE_Y - cell.y + (modifier * 2);
                 if (getCell(cell.x, number)->can_walk_trough) {
                     cell.connected_with.push_back(getCell(cell.x, number));
-                    ++count;
                 }
             }
-            cell.connected_with.resize(count);
         }
         else {
             if (!cell.can_walk_trough) {
@@ -115,22 +115,18 @@ void Game::mapInit() {
             }
             if (getTopCell(&cell)->can_walk_trough) {
                 cell.connected_with.push_back(getTopCell(&cell));
-                ++count;
             }
             if (getRightCell(&cell)->can_walk_trough) {
                 cell.connected_with.push_back(getRightCell(&cell));
-                ++count;
             }
             if (getBottomCell(&cell)->can_walk_trough) { 
                 cell.connected_with.push_back(getBottomCell(&cell));
-                ++count;
             }
             if (getLeftCell(&cell)->can_walk_trough) {
                 cell.connected_with.push_back(getLeftCell(&cell));
-                ++count;
             }
-            cell.connected_with.resize(count);
         }
+        cell.connected_with.resize(cell.connected_with.size());
     }
 }
 

@@ -6,6 +6,7 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <unordered_set>
 
 #ifndef __GAME_HPP__
 #define __GAME_HPP__ 
@@ -18,7 +19,7 @@
 // константы - UPPER_CASE_SNAKE_CASE
 
 
-const int TILE_SIDE_SIZE = 40;      // - размер в пикселях, который будет иметь одна клетка 
+const int TILE_SIDE_SIZE = 35;      // - размер в пикселях, который будет иметь одна клетка 
 const int TEXTURE_SIDE_SIZE = 40;   // - реальный размер стороны текстуры в пикселях
 const int GRID_SIDE_X = 10;         // - количество игровых клеток по горизонтали
 const int GRID_SIDE_Y = 10;         // - количество игровых клеток по вертикали
@@ -37,22 +38,32 @@ public:
 
 class MapObject : public DrawableObject {
 public:
-    bool is_transition_cell;
     bool is_border_cell;
     bool can_walk_trough;
     std::vector<MapObject*> connected_with;
+    MapObject* previous;
+    int cost;
     int x;
     int y;
 
     MapObject();
 };
 
+//class GraphNode {
+//public:
+//    MapObject* previous;
+//    MapObject* cell;
+//    int cost;
+//
+//    GraphNode();
+//};
+
 class MovableObject : public DrawableObject {
 public:
     sf::Vector2i normalized_moving_vector;
     Direction direction;
     MapObject* current_cell;
-    std::array<MapObject, (GRID_SIDE_X + 2)* (GRID_SIDE_Y + 2)>* map;
+    std::array<MapObject, (GRID_SIDE_X + 2) * (GRID_SIDE_Y + 2)>* map;
 
     MovableObject();
     void changeDirectionByInput(sf::Keyboard::Key key_code);
@@ -65,16 +76,19 @@ public:
 class Ghost : public MovableObject {
 private:
     MapObject* target_cell;
+
     bool (Ghost::* checkTargetFunc)();
-    bool (Ghost::* targetFunctions[4])(void);
+    bool (Ghost::* targetFunctions[4])();
     bool checkTargetCellOnTop();
     bool checkTargetCellOnRight();
     bool checkTargetCellOnBottom();
     bool checkTargetCellOnLeft();
     bool pointerPlaceholder();
 
-
 public:
+    MapObject* chooseNode(std::unordered_set<MapObject*> reachable);
+    void findPath(MapObject* start_cell, MapObject* goal_cell);
+    
     Ghost();
     void setTargetCell(MapObject* target_cell);
     void checkTargetCell();
@@ -112,6 +126,10 @@ public:
     MapObject* getRightCell(MapObject* cell);
     MapObject* getBottomCell(MapObject* cell);
     MapObject* getLeftCell(MapObject* cell);
+    template<typename val, typename container>
+    bool in(val elem, container list) {
+        return list.find(elem) != list.end();
+    }
     //-------------------------------------------------------------------
     void checkCollisions(MovableObject& obj);
     void checkTransition(MovableObject& obj);

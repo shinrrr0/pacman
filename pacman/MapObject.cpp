@@ -5,6 +5,8 @@ MapObject::MapObject() {
     this->can_walk_trough = true;
     this->setTextureByPath("assets\\empty.png");
     this->connected_with.reserve(4);
+    this->previous = nullptr;
+    this->cost = INFINITY;
     this->x = 0;
     this->y = 0;
 }
