@@ -49,20 +49,32 @@ public:
     MapObject();
 };
 
-//class GraphNode {
-//public:
-//    MapObject* previous;
-//    MapObject* cell;
-//    int cost;
-//
-//    GraphNode();
-//};
+class HelperClass {
+public:
+    std::array<MapObject, (GRID_SIDE_X + 2)* (GRID_SIDE_Y + 2)> map{};
+    std::vector<MapObject*> playable_tiles{};
+    std::vector<MapObject*> border_tiles{};
+
+    sf::Vector2i defineCellByCoords(float x, float y);
+    MapObject* getCell(int x, int y);
+    MapObject* getTopCell(MapObject* cell);
+    MapObject* getRightCell(MapObject* cell);
+    MapObject* getBottomCell(MapObject* cell);
+    MapObject* getLeftCell(MapObject* cell);
+    template<typename val, typename container>
+    bool in(val elem, container list) {
+        return list.find(elem) != list.end();
+    }
+
+    HelperClass();
+};
 
 class MovableObject : public DrawableObject {
 public:
     sf::Vector2i normalized_moving_vector;
     Direction direction;
     MapObject* current_cell;
+    HelperClass* helper;
     std::array<MapObject, (GRID_SIDE_X + 2) * (GRID_SIDE_Y + 2)>* map;
 
     MovableObject();
@@ -76,6 +88,7 @@ public:
 class Ghost : public MovableObject {
 private:
     MapObject* target_cell;
+    std::vector<MapObject*> path;
 
     bool (Ghost::* checkTargetFunc)();
     bool (Ghost::* targetFunctions[4])();
@@ -84,9 +97,10 @@ private:
     bool checkTargetCellOnBottom();
     bool checkTargetCellOnLeft();
     bool pointerPlaceholder();
-
+    MapObject* chooseNode(std::unordered_set<MapObject*> reachable, MapObject* goal_node);
+    void buildPath(MapObject* goal_node);
 public:
-    MapObject* chooseNode(std::unordered_set<MapObject*> reachable);
+   
     void findPath(MapObject* start_cell, MapObject* goal_cell);
     
     Ghost();
@@ -101,36 +115,20 @@ private:
 
     void windowInit();
     void spritesInit();
-    void mapInit();
     void textInit();
 
 public:
     float delta_time;
     sf::RenderWindow window;
+    HelperClass helper;
     MovableObject player;
     Ghost ghost;
-    std::array<MapObject, (GRID_SIDE_X + 2) * (GRID_SIDE_Y + 2)> map{};
-    std::vector<MapObject*> playable_tiles{};
-    std::vector<MapObject*> border_tiles{};
     sf::Text text;
 
     Game();
     void update();
     void inputHandler(sf::Keyboard::Key key_code);
     void moveInCurrentDirection(MovableObject& obj);
-    //-------------------------------------------------------------------
-    // этот блок нужно будет вынести в отдельный вспомогательный класс
-    sf::Vector2i defineCellByCoords(float x, float y);
-    MapObject* getCell(int x, int y); // - по координатам клетки
-    MapObject* getTopCell(MapObject* cell);
-    MapObject* getRightCell(MapObject* cell);
-    MapObject* getBottomCell(MapObject* cell);
-    MapObject* getLeftCell(MapObject* cell);
-    template<typename val, typename container>
-    bool in(val elem, container list) {
-        return list.find(elem) != list.end();
-    }
-    //-------------------------------------------------------------------
     void checkCollisions(MovableObject& obj);
     void checkTransition(MovableObject& obj);
     void drawPlayableTiles();

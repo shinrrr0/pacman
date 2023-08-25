@@ -62,5 +62,5 @@ void MovableObject::setMovingDirectionToNone() {
 void MovableObject::defineCell() {
     int x = (((this->getPosition().x) + TILE_SIDE_SIZE / 2 + TILE_SIDE_SIZE) / TILE_SIDE_SIZE);
     int y = (((this->getPosition().y) + TILE_SIDE_SIZE / 2 + TILE_SIDE_SIZE) / TILE_SIDE_SIZE);
-    current_cell = &((*map)[(y - 1) * (GRID_SIDE_X + 2) + x - 1]);
+    current_cell = helper->getCell(x - 1, y - 1);
 }

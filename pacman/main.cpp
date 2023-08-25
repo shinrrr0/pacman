@@ -6,12 +6,7 @@ int main() {
     Game* game = new Game;
     game->window.setFramerateLimit(144);
 
-    //game->ghost.setTargetCell(game->getCell(4, 6));
-    //for (auto elem: game->getCell(5, 5)->connected_with) {
-    //    elem->setTextureByPath("assets\\target.png");
-    //}
-    //game->ghost.findPath(game->ghost.current_cell, game->player.current_cell);
-    //game->ghost.findPath(game->getCell(3, 3), game->getCell(3, 3));
+    game->ghost.findPath(game->ghost.current_cell, game->player.current_cell);
 
     while (game->window.isOpen()) {
         sf::Event event;

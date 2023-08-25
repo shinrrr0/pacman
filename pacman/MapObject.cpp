@@ -6,7 +6,7 @@ MapObject::MapObject() {
     this->setTextureByPath("assets\\empty.png");
     this->connected_with.reserve(4);
     this->previous = nullptr;
-    this->cost = INFINITY;
+    this->cost = GRID_SIDE_X * GRID_SIDE_Y;
     this->x = 0;
     this->y = 0;
 }

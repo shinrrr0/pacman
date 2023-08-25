@@ -13,7 +13,7 @@ void Ghost::setTargetCell(MapObject* target_cell) {
     target_cell->setTextureByPath("assets\\target.png");
     sf::Vector2f difference = this->getPosition() - target_cell->getPosition();
 
-    bool direction_conditions[4]{
+    bool direction_conditions[4] {
         difference.y > 0 && !difference.x,      // move up
         difference.x < 0 && !difference.y,      // move right
         difference.y < 0 && !difference.x,      // move down
@@ -35,14 +35,26 @@ void Ghost::checkTargetCell() {
     this->setPosition(target_cell->getPosition());
 }
 
-//GraphNode* Ghost::getNodeByCell(MapObject* cell) {
-//    for (GraphNode node : graph) {
-//        if (node.cell == cell) {
-//            return &node;
-//        }
-//    }
-//    return nullptr;
-//}
+MapObject* Ghost::chooseNode(std::unordered_set<MapObject*> reachable, MapObject* goal_node) {
+    int node_index = rand() % reachable.size();
+    int counter = 0;
+    for (MapObject* node : reachable) {
+        if (counter == node_index) {
+            return node;
+        }
+    }
+}
+
+void Ghost::buildPath(MapObject* goal_node) {
+    path.clear();
+    while (goal_node != nullptr) {
+        path.push_back(goal_node);
+        goal_node = goal_node->previous;
+    }
+    for (auto elem : path) {
+        elem->setTextureByPath("assets\\target.png");
+    }
+}
 
 void Ghost::findPath(MapObject* start_node, MapObject* goal_node) {
 
@@ -55,31 +67,37 @@ void Ghost::findPath(MapObject* start_node, MapObject* goal_node) {
     
     MapObject* node;
 
-    //while (!reachable.empty()) {
-    //    node = chooseNode(reachable);
+    while (!reachable.empty()) {
+        node = chooseNode(reachable, goal_node);
 
-    //    if (node == goal_node) { return; }
-    //    reachable.erase(node);
-    //    explored.insert(node);
+        if (node == goal_node) {
+            return buildPath(goal_node);
+        }
+        reachable.erase(node);
+        explored.insert(node);
 
-    //    new_reachable.clear();
+        new_reachable.clear();
 
-    //    for (MapObject* new_node : node->connected_with) {
-    //        if (!Game::in(new_node, explored)) {
-    //            new_reachable.insert(new_node);
-    //        }
-    //    }
+        for (MapObject* new_node : node->connected_with) {
+            if (!helper->in(new_node, explored)) {
+                new_reachable.insert(new_node);
+            }
+        }
 
-    //    for (MapObject* adjacent : new_reachable) {
-    //        if (!Game::in(adjacent, reachable)) {
-    //            reachable.insert(adjacent);
-    //        }
-    //        if (node->cost + 1 < adjacent->cost) {
-    //            adjacent->previous = node;
-    //            adjacent->cost = node->cost + 1;
-    //        }
-    //    }
-    //}
+        for (MapObject* adjacent : new_reachable) {
+            if (!helper->in(adjacent, reachable)) {
+                reachable.insert(adjacent);
+            }
+            if (node->cost + 1 < adjacent->cost) {
+                adjacent->previous = node;
+                adjacent->cost = node->cost + 1;
+            }
+        }
+    }
+    for (MapObject& node : helper->map) {
+        node.previous = nullptr;
+        node.cost = GRID_SIDE_X * GRID_SIDE_Y;
+    }
 };
 
 bool Ghost::checkTargetCellOnTop() {
