@@ -7,6 +7,7 @@
 #include <array>
 #include <vector>
 #include <unordered_set>
+#include <stack>
 
 #ifndef __GAME_HPP__
 #define __GAME_HPP__ 
@@ -19,12 +20,12 @@
 // константы - UPPER_CASE_SNAKE_CASE
 
 
-const int TILE_SIDE_SIZE = 35;      // - размер в пикселях, который будет иметь одна клетка 
-const int TEXTURE_SIDE_SIZE = 40;   // - реальный размер стороны текстуры в пикселях
-const int GRID_SIDE_X = 10;         // - количество игровых клеток по горизонтали
-const int GRID_SIDE_Y = 10;         // - количество игровых клеток по вертикали
-const sf::Vector2f SPRITE_SCALE{ float(TILE_SIDE_SIZE) / TEXTURE_SIDE_SIZE, float(TILE_SIDE_SIZE) / TEXTURE_SIDE_SIZE }; // константа нужная для масштабирования текстур под разер клеток
-const int PLAYER_SPEED_COEF = 50 * SPRITE_SCALE.x; // - скорость игрока, масштабируется от общего скейла
+const int TILE_SIDE_SIZE = 64;
+const int TEXTURE_SIDE_SIZE = 16;
+const int GRID_SIDE_X = 14;
+const int GRID_SIDE_Y = 12;
+const sf::Vector2f SPRITE_SCALE{ float(TILE_SIDE_SIZE) / TEXTURE_SIDE_SIZE, float(TILE_SIDE_SIZE) / TEXTURE_SIDE_SIZE };
+const int PLAYER_SPEED_COEF = 20 * SPRITE_SCALE.x;
 enum class Direction { None = 0, Up = 1, Right = 2, Down = 3, Left = 4 };
 
 class DrawableObject : public sf::Sprite {
@@ -71,6 +72,7 @@ public:
 
 class MovableObject : public DrawableObject {
 public:
+    float speed; 
     sf::Vector2i normalized_moving_vector;
     Direction direction;
     MapObject* current_cell;
@@ -88,7 +90,6 @@ public:
 class Ghost : public MovableObject {
 private:
     MapObject* target_cell;
-    std::vector<MapObject*> path;
 
     bool (Ghost::* checkTargetFunc)();
     bool (Ghost::* targetFunctions[4])();
@@ -97,7 +98,7 @@ private:
     bool checkTargetCellOnBottom();
     bool checkTargetCellOnLeft();
     bool pointerPlaceholder();
-    MapObject* chooseNode(std::unordered_set<MapObject*> reachable, MapObject* goal_node);
+    MapObject& chooseNode(std::unordered_set<MapObject*> reachable, MapObject* goal_node);
     void buildPath(MapObject* goal_node);
 public:
    
@@ -105,7 +106,7 @@ public:
     
     Ghost();
     void setTargetCell(MapObject* target_cell);
-    void checkTargetCell();
+    bool checkTargetCell();
 };
 
 class Game {

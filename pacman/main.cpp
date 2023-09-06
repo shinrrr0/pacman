@@ -26,8 +26,11 @@ int main() {
 
         game->checkTransition(game->player);
         game->checkCollisions(game->player);
-
-        game->ghost.checkTargetCell();
+        
+        if (game->ghost.checkTargetCell()) {
+            game->checkTransition(game->ghost);
+            game->ghost.findPath(game->ghost.current_cell, game->player.current_cell);
+        }
 
         game->window.draw(game->player);// - временно
         game->window.draw(game->ghost);// - временно

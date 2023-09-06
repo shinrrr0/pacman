@@ -2,6 +2,7 @@
 
 MovableObject::MovableObject() : DrawableObject() {
     this->setMovingDirectionToNone();
+    this->speed = 0;
 }
 
 void MovableObject::changeDirectionByInput(sf::Keyboard::Key key_code) {

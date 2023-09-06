@@ -46,33 +46,57 @@ HelperClass::HelperClass() {
         this->getCell(i, GRID_SIDE_Y)->setTextureByPath("assets\\wall.png");
         this->getCell(i, GRID_SIDE_Y)->can_walk_trough = false;
     }
-    for (int i = 1; i < GRID_SIDE_X ; ++i) {
-        this->getCell(i, 4)->setTextureByPath("assets\\wall.png");
-        this->getCell(i, 4)->can_walk_trough = false;
+    for (int i = 1; i < (GRID_SIDE_Y / 2); ++i) {
+        this->getCell(1, i)->setTextureByPath("assets\\wall.png");
+        this->getCell(1, i)->can_walk_trough = false;
     }
-    for (int i = 2; i < GRID_SIDE_X + 1; ++i) {
-        this->getCell(i, 7)->setTextureByPath("assets\\wall.png");
-        this->getCell(i, 7)->can_walk_trough = false;
+    for (int i = (GRID_SIDE_Y / 2) + 2; i < GRID_SIDE_Y; ++i) {
+        this->getCell(1, i)->setTextureByPath("assets\\wall.png");
+        this->getCell(1, i)->can_walk_trough = false;
     }
+    for (int i = 1; i < (GRID_SIDE_Y / 2); ++i) {
+        this->getCell(GRID_SIDE_X, i)->setTextureByPath("assets\\wall.png");
+        this->getCell(GRID_SIDE_X, i)->can_walk_trough = false;
+    }
+    for (int i = (GRID_SIDE_Y / 2) + 2; i < GRID_SIDE_Y; ++i) {
+        this->getCell(GRID_SIDE_X, i)->setTextureByPath("assets\\wall.png");
+        this->getCell(GRID_SIDE_X, i)->can_walk_trough = false;
+    }
+    for (int i = 3; i < GRID_SIDE_Y - 1; ++i) {
+        this->getCell(4, i)->setTextureByPath("assets\\wall.png");
+        this->getCell(4, i)->can_walk_trough = false;
+    }
+    for (int i = 3; i < GRID_SIDE_Y - 1; ++i) {
+        this->getCell(GRID_SIDE_X - 3, i)->setTextureByPath("assets\\wall.png");
+        this->getCell(GRID_SIDE_X - 3, i)->can_walk_trough = false;
+    }
+    //for (int i = 1; i < GRID_SIDE_X ; ++i) {
+    //    this->getCell(i, 4)->setTextureByPath("assets\\wall.png");
+    //    this->getCell(i, 4)->can_walk_trough = false;
+    //}
+    //for (int i = 2; i < GRID_SIDE_X + 1; ++i) {
+    //    this->getCell(i, 7)->setTextureByPath("assets\\wall.png");
+    //    this->getCell(i, 7)->can_walk_trough = false;
+    //}
     //------------------------------------------------------------------------------------------
 
     for (int i = 0; i < (GRID_SIDE_X + 2); ++i) {
-        this->map[i].setTextureByPath("assets\\empty1.png");
+        this->map[i].setTextureByPath("assets\\empty.png");
         this->border_tiles.push_back(&map[i]);
         map[i].is_border_cell = true;
     }
     for (int i = (GRID_SIDE_X + 2) * (GRID_SIDE_Y + 1); i < (GRID_SIDE_X + 2) * (GRID_SIDE_Y + 2); ++i) {
-        this->map[i].setTextureByPath("assets\\empty1.png");
+        this->map[i].setTextureByPath("assets\\empty.png");
         this->border_tiles.push_back(&map[i]);
         map[i].is_border_cell = true;
     }
     for (int i = 1; i < (GRID_SIDE_Y + 1); ++i) {
-        this->map[i * (GRID_SIDE_X + 2)].setTextureByPath("assets\\empty1.png");
+        this->map[i * (GRID_SIDE_X + 2)].setTextureByPath("assets\\empty.png");
         this->border_tiles.push_back(&map[i * (GRID_SIDE_X + 2)]);
         map[i * (GRID_SIDE_X + 2)].is_border_cell = true;
     }
     for (int i = 2; i < GRID_SIDE_Y + 2; ++i) {
-        this->map[i * (GRID_SIDE_X + 2) - 1].setTextureByPath("assets\\empty1.png");
+        this->map[i * (GRID_SIDE_X + 2) - 1].setTextureByPath("assets\\empty.png");
         this->border_tiles.push_back(&map[i * (GRID_SIDE_X + 2) - 1]);
         map[i * (GRID_SIDE_X + 2) - 1].is_border_cell = true;
     }

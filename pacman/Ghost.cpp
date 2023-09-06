@@ -10,7 +10,6 @@ Ghost::Ghost() {
 }
 
 void Ghost::setTargetCell(MapObject* target_cell) {
-    target_cell->setTextureByPath("assets\\target.png");
     sf::Vector2f difference = this->getPosition() - target_cell->getPosition();
 
     bool direction_conditions[4] {
@@ -28,36 +27,36 @@ void Ghost::setTargetCell(MapObject* target_cell) {
     }
 }
 
-void Ghost::checkTargetCell() {
-    if (!(this->*checkTargetFunc)()) return;
+bool Ghost::checkTargetCell() {
+    if (!(this->*checkTargetFunc)()) return false;
     this->checkTargetFunc = &Ghost::pointerPlaceholder;
     this->setMovingDirectionToNone();
     this->setPosition(target_cell->getPosition());
+    return true;
 }
 
-MapObject* Ghost::chooseNode(std::unordered_set<MapObject*> reachable, MapObject* goal_node) {
+MapObject& Ghost::chooseNode(std::unordered_set<MapObject*> reachable, MapObject* goal_node) {
     int node_index = rand() % reachable.size();
     int counter = 0;
     for (MapObject* node : reachable) {
         if (counter == node_index) {
-            return node;
+            return *node;
         }
+        counter++;
     }
 }
 
 void Ghost::buildPath(MapObject* goal_node) {
-    path.clear();
+    std::stack<MapObject*> path;
     while (goal_node != nullptr) {
-        path.push_back(goal_node);
+        path.push(goal_node);
         goal_node = goal_node->previous;
     }
-    for (auto elem : path) {
-        elem->setTextureByPath("assets\\target.png");
-    }
+    path.pop();
+    if(!path.empty()) this->setTargetCell(path.top());
 }
 
 void Ghost::findPath(MapObject* start_node, MapObject* goal_node) {
-
     std::unordered_set<MapObject*> reachable;
     std::unordered_set<MapObject*> new_reachable;
     std::unordered_set<MapObject*> explored;
@@ -68,10 +67,11 @@ void Ghost::findPath(MapObject* start_node, MapObject* goal_node) {
     MapObject* node;
 
     while (!reachable.empty()) {
-        node = chooseNode(reachable, goal_node);
+        node = &chooseNode(reachable, goal_node);
 
         if (node == goal_node) {
-            return buildPath(goal_node);
+            buildPath(goal_node);
+            break;
         }
         reachable.erase(node);
         explored.insert(node);

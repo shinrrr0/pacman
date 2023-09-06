@@ -1,7 +1,7 @@
 #include "Game.hpp"
 
 DrawableObject::DrawableObject() {
-    setTextureByPath("assets\\placeholder.png");
+    setTextureByPath("assets\\empty.png");
 }
 
 void DrawableObject::setTextureByPath(std::string path) {

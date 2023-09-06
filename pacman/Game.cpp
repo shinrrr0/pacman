@@ -20,14 +20,16 @@ void Game::windowInit() {
 
 void Game::spritesInit() {
     this->player.setTextureByPath("assets\\f.png");
-    this->player.setPosition((2 * TILE_SIDE_SIZE), (2 * TILE_SIDE_SIZE));
+    this->player.setPosition((2 * TILE_SIDE_SIZE), (9 * TILE_SIDE_SIZE));
+    this->player.speed = 20 * SPRITE_SCALE.x;
     this->player.helper = &(this->helper);
     this->player.defineCell();
     
     this->ghost.setTextureByPath("assets\\ghost.png");
     //this->ghost.setPosition((4 * TILE_SIDE_SIZE), (4 * TILE_SIDE_SIZE));
     //this->ghost.setPosition((10 * TILE_SIDE_SIZE), (3 * TILE_SIDE_SIZE));
-    this->ghost.setPosition((10 * TILE_SIDE_SIZE), (9 * TILE_SIDE_SIZE));
+    this->ghost.setPosition((9 * TILE_SIDE_SIZE), (9 * TILE_SIDE_SIZE));
+    this->ghost.speed = 15 * SPRITE_SCALE.x;
     this->ghost.helper = &(this->helper);
     this->ghost.defineCell();
 }
@@ -36,7 +38,7 @@ void Game::textInit() {
     this->font.loadFromFile("assets\\emulogic.ttf");
     this->text.setFont(this->font);
     this->text.setString("0 0");
-    this->text.setCharacterSize(35 * SPRITE_SCALE.x);
+    this->text.setCharacterSize(15 * SPRITE_SCALE.x);
 }
 
 void Game::update() {
@@ -56,8 +58,8 @@ void Game::inputHandler(sf::Keyboard::Key key_code) {
 
 void Game::moveInCurrentDirection(MovableObject& obj) {
     obj.move(
-        obj.normalized_moving_vector.x * PLAYER_SPEED_COEF * delta_time,
-        obj.normalized_moving_vector.y * PLAYER_SPEED_COEF * delta_time);
+        obj.normalized_moving_vector.x * obj.speed * delta_time,
+        obj.normalized_moving_vector.y * obj.speed * delta_time);
     obj.defineCell();
 }
 
