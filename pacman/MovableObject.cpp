@@ -1,10 +1,12 @@
 #include "Game.hpp"
 
+// Конструктор MovableObject
 MovableObject::MovableObject() : DrawableObject() {
     this->setMovingDirectionToNone();
     this->speed = 0;
 }
 
+// Назначение направления объекта по коду клавиши
 void MovableObject::changeDirectionByInput(sf::Keyboard::Key key_code) {
     switch (key_code) {
     case sf::Keyboard::Up:
@@ -25,6 +27,7 @@ void MovableObject::changeDirectionByInput(sf::Keyboard::Key key_code) {
     }
 }
 
+// Изменение направления, изменение нормализованного вектора
 void MovableObject::changeDirection(Direction direction) {
     switch (direction) {
     case Direction::Up:
@@ -50,16 +53,19 @@ void MovableObject::changeDirection(Direction direction) {
     this->direction = direction;
 }
 
+// Изменение движения по номеру направления
 void MovableObject::changeDirection(int direction) {
     this->changeDirection(static_cast<Direction>(direction));
 }
 
+// Сброс направления движения и нормализованного вектора
 void MovableObject::setMovingDirectionToNone() {
     this->direction = Direction::None;
     this->normalized_moving_vector.x = 0;
     this->normalized_moving_vector.y = 0;
 }
 
+// Обновление текущей клетки объекта
 void MovableObject::defineCell() {
     int x = (((this->getPosition().x) + TILE_SIDE_SIZE / 2 + TILE_SIDE_SIZE) / TILE_SIDE_SIZE);
     int y = (((this->getPosition().y) + TILE_SIDE_SIZE / 2 + TILE_SIDE_SIZE) / TILE_SIDE_SIZE);

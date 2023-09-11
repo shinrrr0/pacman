@@ -3,56 +3,68 @@
 
 
 int main() {
-    Game* game = new Game;
+    Game* game = new Game; // Создание экземпляра класса игры
     game->window.setFramerateLimit(144);
 
     game->ghost.findPath(game->ghost.current_cell, game->player.current_cell);
 
+    // Игровой цикл
     while (game->window.isOpen()) {
         sf::Event event;
+
+        //Обработка SFML Events
         while (game->window.pollEvent(event)) {
+            
             switch (event.type) {
             case sf::Event::Closed: game->window.close(); break;
             case sf::Event::KeyPressed: game->inputHandler(event.key.code); break;
             }
         }
+
+        // Очищение игрового окна
         game->window.clear();
+
+        // Рендер игровых клеток
         game->drawPlayableTiles();
 
+        // Обновление времени между кадрами
         game->update();
 
+        // Перемещение объекта
         game->moveInCurrentDirection(game->player);
         game->moveInCurrentDirection(game->ghost);
 
+        // Проверка перехода через границу окна
         game->checkTransition(game->player);
+
+        // Проверка столкновения игрока со стенами
         game->checkCollisions(game->player);
         
+        // Вызов поиска пути приведения
         if (game->ghost.checkTargetCell()) {
             game->checkTransition(game->ghost);
             game->ghost.findPath(game->ghost.current_cell, game->player.current_cell);
         }
 
-        game->window.draw(game->player);// - временно
-        game->window.draw(game->ghost);// - временно
+        // Отрисовка двигающихся объектов
+        game->window.draw(game->player);
+        game->window.draw(game->ghost);
+
+        // Рендер рамки
         game->drawBorderTiles();
 
-
+        // Обновление строки
         game->text.setString(std::to_string(game->player.current_cell->x) + ' ' + std::to_string(game->player.current_cell->y));
-        //sf::Vector2i pos = game->defineCellByCoords(game->player.getPosition().x, game->player.getPosition().y);
-        //game->text.setString(std::to_string(pos.x) + ' ' + std::to_string(pos.y));
+
         //game->text.setString(std::to_string(1 / game->delta_time)); // ФПС метр
+
+        // Рендер текста
         game->window.draw(game->text);
+
+        // Отображение всех объектов на окне
         game->window.display();
     }
 
     delete game;
     return 0;
 }
-
-//std::cout << static_cast<int>(Direction::Right);
-//sf::CircleShape shape(100.f);
-//shape.setPosition(100, 100);
-//shape.setFillColor(sf::Color::Red);
-//shape.move(sf::Vector2f(20.f * deltaTime, 20.f * deltaTime));
-//window.draw(shape);
-//window.setFramerateLimit(5);

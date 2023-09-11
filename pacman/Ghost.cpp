@@ -1,5 +1,7 @@
 #include "Game.hpp"
 
+
+// Кронструктор Ghost
 Ghost::Ghost() {
     this->target_cell = nullptr;
     this->checkTargetFunc = &Ghost::pointerPlaceholder;
@@ -9,6 +11,7 @@ Ghost::Ghost() {
     targetFunctions[3] = &Ghost::checkTargetCellOnLeft;
 }
 
+// Задание целевой точки для переменщения призрака
 void Ghost::setTargetCell(MapObject* target_cell) {
     sf::Vector2f difference = this->getPosition() - target_cell->getPosition();
 
@@ -18,6 +21,8 @@ void Ghost::setTargetCell(MapObject* target_cell) {
         difference.y < 0 && !difference.x,      // move down
         difference.x > 0 && !difference.y       // move left
     };
+
+    // Проверка на направление
     for (int i = 0; i < 4; ++i) {
         if (direction_conditions[i]) {
             this->target_cell = target_cell;
@@ -27,6 +32,7 @@ void Ghost::setTargetCell(MapObject* target_cell) {
     }
 }
 
+// Проверка на нахождения в целевой клетке
 bool Ghost::checkTargetCell() {
     if (!(this->*checkTargetFunc)()) return false;
     this->checkTargetFunc = &Ghost::pointerPlaceholder;
@@ -35,6 +41,7 @@ bool Ghost::checkTargetCell() {
     return true;
 }
 
+// Функция алгоритма поиска пути для выбора доступного узла графа
 MapObject& Ghost::chooseNode(std::unordered_set<MapObject*> reachable, MapObject* goal_node) {
     int node_index = rand() % reachable.size();
     int counter = 0;
@@ -46,6 +53,7 @@ MapObject& Ghost::chooseNode(std::unordered_set<MapObject*> reachable, MapObject
     }
 }
 
+// Функция алгоритма поиска пути для построения конечного маршрута
 void Ghost::buildPath(MapObject* goal_node) {
     std::stack<MapObject*> path;
     while (goal_node != nullptr) {
@@ -53,9 +61,12 @@ void Ghost::buildPath(MapObject* goal_node) {
         goal_node = goal_node->previous;
     }
     path.pop();
-    if(!path.empty()) this->setTargetCell(path.top());
+    if (!path.empty()) {
+        this->setTargetCell(path.top());
+    }
 }
 
+// Алгоритм поиска пути
 void Ghost::findPath(MapObject* start_node, MapObject* goal_node) {
     std::unordered_set<MapObject*> reachable;
     std::unordered_set<MapObject*> new_reachable;
@@ -100,20 +111,29 @@ void Ghost::findPath(MapObject* start_node, MapObject* goal_node) {
     }
 };
 
+// Проверка - находится ли целевая клетка призрака
+
+//top
 bool Ghost::checkTargetCellOnTop() {
     return static_cast<int>(this->getPosition().y) == static_cast<int>(target_cell->getPosition().y) || static_cast<int>(this->getPosition().y) < static_cast<int>(target_cell->getPosition().y);
 }
 
+// right
 bool Ghost::checkTargetCellOnRight() {
     return static_cast<int>(this->getPosition().x) == static_cast<int>(target_cell->getPosition().x) || static_cast<int>(this->getPosition().x) > static_cast<int>(target_cell->getPosition().x);
 }
 
+// bottom
 bool Ghost::checkTargetCellOnBottom() {
     return static_cast<int>(this->getPosition().y) == static_cast<int>(target_cell->getPosition().y) || static_cast<int>(this->getPosition().y) > static_cast<int>(target_cell->getPosition().y);
 }
 
+// left
 bool Ghost::checkTargetCellOnLeft() {
     return static_cast<int>(this->getPosition().x) == static_cast<int>(target_cell->getPosition().x) || static_cast<int>(this->getPosition().x) < static_cast<int>(target_cell->getPosition().x);
 }
 
-bool Ghost::pointerPlaceholder() { return false; }
+// Стандартная функция для проверки направления
+bool Ghost::pointerPlaceholder() { 
+    return false; 
+}

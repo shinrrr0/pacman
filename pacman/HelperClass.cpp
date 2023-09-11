@@ -1,28 +1,41 @@
+
 #include "Game.hpp"
 
+// Получение координат клетки в общей сетке по ее координатам в пикселях
 sf::Vector2i HelperClass::defineCellByCoords(float x, float y) {
     return sf::Vector2i(
         x = ((x + (float)TILE_SIDE_SIZE) / (float)TILE_SIDE_SIZE) - 1.f,
         y = ((y + (float)TILE_SIDE_SIZE) / (float)TILE_SIDE_SIZE) - 1.f);
 }
 
+// Получение указателя на клетку по ее координатам в общей сетке
 MapObject* HelperClass::getCell(int x, int y) {
     return &(map[(y) * (GRID_SIDE_X + 2) + x]);
 }
 
+// Получение указателя на клетку сверху
+
+// top
 MapObject* HelperClass::getTopCell(MapObject* cell) {
     return getCell(cell->x, cell->y - 1);
 };
+
+// right
 MapObject* HelperClass::getRightCell(MapObject* cell) {
     return getCell(cell->x + 1, cell->y);
 };
+
+// bottom
 MapObject* HelperClass::getBottomCell(MapObject* cell) {
     return getCell(cell->x, cell->y + 1);
 };
+
+// left
 MapObject* HelperClass::getLeftCell(MapObject* cell) {
     return getCell(cell->x - 1, cell->y);
 };
 
+// Конструктор HelperClass, инициализация карты
 HelperClass::HelperClass() {
     this->playable_tiles.reserve(GRID_SIDE_X * GRID_SIDE_Y);
     this->border_tiles.reserve((2 * GRID_SIDE_X) + 4 + (2 * GRID_SIDE_Y));
@@ -38,6 +51,9 @@ HelperClass::HelperClass() {
     }
 
     //------------------------------------------------------------------------------------------
+    
+    //Расположение стен на карте 
+
     for (int i = 1; i < GRID_SIDE_X + 1; ++i) {
         this->getCell(i, 1)->setTextureByPath("assets\\wall.png");
         this->getCell(i, 1)->can_walk_trough = false;
@@ -78,7 +94,11 @@ HelperClass::HelperClass() {
     //    this->getCell(i, 7)->setTextureByPath("assets\\wall.png");
     //    this->getCell(i, 7)->can_walk_trough = false;
     //}
+
+
     //------------------------------------------------------------------------------------------
+
+    // Создание рамки
 
     for (int i = 0; i < (GRID_SIDE_X + 2); ++i) {
         this->map[i].setTextureByPath("assets\\empty.png");
@@ -101,6 +121,7 @@ HelperClass::HelperClass() {
         map[i * (GRID_SIDE_X + 2) - 1].is_border_cell = true;
     }
 
+
     int tile_n = 0;
     while (tile_n < GRID_SIDE_Y) {
         for (int j = 0; j < GRID_SIDE_X; j++) {
@@ -110,6 +131,7 @@ HelperClass::HelperClass() {
         ++tile_n;
     }
 
+    //Инициализация графа
     for (MapObject& cell : map) {
         if (cell.is_border_cell) {
             int index = 0;

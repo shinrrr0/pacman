@@ -1,5 +1,6 @@
 #include "Game.hpp"
 
+// Конструктор MapObject
 MapObject::MapObject() {
     this->is_border_cell = false;
     this->can_walk_trough = true;

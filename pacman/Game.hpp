@@ -14,47 +14,49 @@
 
 
 
-// ЖХОЛГЙЙ - camelCase
-// РПМС - snake_case
-// ЛМБУУЩ, УФТХЛФХТЩ Й Ф.Р - PascalCase
-// ЛПОУФБОФЩ - UPPER_CASE_SNAKE_CASE
+// Функции, методы - camelCase
+// Переменные, поля - snake_case
+// Классы - PascalCase
+// Константы - UPPER_CASE_SNAKE_CASE
 
 
-const int TILE_SIDE_SIZE = 64;
-const int TEXTURE_SIDE_SIZE = 16;
-const int GRID_SIDE_X = 14;
-const int GRID_SIDE_Y = 12;
-const sf::Vector2f SPRITE_SCALE{ float(TILE_SIDE_SIZE) / TEXTURE_SIDE_SIZE, float(TILE_SIDE_SIZE) / TEXTURE_SIDE_SIZE };
-const int PLAYER_SPEED_COEF = 20 * SPRITE_SCALE.x;
-enum class Direction { None = 0, Up = 1, Right = 2, Down = 3, Left = 4 };
+const int TILE_SIDE_SIZE = 64; // Размер стороны клетки игрового поля в пикселях
+const int TEXTURE_SIDE_SIZE = 16; // Размер стороны текстуры игрового поля в пикселях
+const int GRID_SIDE_X = 14; // Длина игрового поля по оси X
+const int GRID_SIDE_Y = 12; // Длина игрового поля по оси Y
+const sf::Vector2f SPRITE_SCALE{ float(TILE_SIDE_SIZE) / TEXTURE_SIDE_SIZE,
+                                 float(TILE_SIDE_SIZE) / TEXTURE_SIDE_SIZE }; // Коэффицент изменения размера текстуры
+enum class Direction { None = 0, Up = 1, Right = 2, Down = 3, Left = 4 }; // Перечисление направлений движения
 
+// Базовый класс для любого отображаемого объекта
 class DrawableObject : public sf::Sprite {
 private:
-    sf::Texture texture;
+    sf::Texture texture; // Текстура
 public:
     void setTextureByPath(std::string path);
     DrawableObject();
-    DrawableObject(std::string texture_path, sf::Vector2f position = sf::Vector2f(0, 0)); // ЧТЕНЕООЩК ЛПОУФТХЛФПТ ДМС bg, ОХЦОП ВХДЕФ ХДБМЙФШ
 };
 
+// Класс игровой клетки
 class MapObject : public DrawableObject {
 public:
-    bool is_border_cell;
-    bool can_walk_trough;
-    std::vector<MapObject*> connected_with;
-    MapObject* previous;
-    int cost;
-    int x;
-    int y;
+    bool is_border_cell; // Принадлежит ли клетка рамке
+    bool can_walk_trough; // Можно ли пройти через клетку
+    std::vector<MapObject*> connected_with; // Вектор указателей на соседние клетки
+    MapObject* previous; // Ссылка на предыдующую клетку
+    int cost; // Цена перехода на эту клетку
+    int x; // Позиция в общей сетке по x
+    int y; // Позиция в общей сетке по y
 
     MapObject();
 };
 
+// Вспомагательный класс, который хранит в себе: карту и вспомгательные функции
 class HelperClass {
 public:
-    std::array<MapObject, (GRID_SIDE_X + 2)* (GRID_SIDE_Y + 2)> map{};
-    std::vector<MapObject*> playable_tiles{};
-    std::vector<MapObject*> border_tiles{};
+    std::array<MapObject, (GRID_SIDE_X + 2)* (GRID_SIDE_Y + 2)> map{}; // Массив всех клеток
+    std::vector<MapObject*> playable_tiles{}; // Вектор указателей на игровые клетки
+    std::vector<MapObject*> border_tiles{}; // Вектор указателей на клетки рамки
 
     sf::Vector2i defineCellByCoords(float x, float y);
     MapObject* getCell(int x, int y);
@@ -70,14 +72,15 @@ public:
     HelperClass();
 };
 
+// Классы двигающихся объектов
 class MovableObject : public DrawableObject {
 public:
-    float speed; 
-    sf::Vector2i normalized_moving_vector;
-    Direction direction;
-    MapObject* current_cell;
-    HelperClass* helper;
-    std::array<MapObject, (GRID_SIDE_X + 2) * (GRID_SIDE_Y + 2)>* map;
+    float speed; // Коэффицент скорости
+    sf::Vector2i normalized_moving_vector; // Нормализованный вектор движения
+    Direction direction; // Направление движения
+    MapObject* current_cell; // Указатель на текущую клетку
+    HelperClass* helper; // Указатель на вспомагательный класс
+
 
     MovableObject();
     void changeDirectionByInput(sf::Keyboard::Key key_code);
@@ -87,6 +90,7 @@ public:
     void defineCell();
 };
 
+// Класс приведения
 class Ghost : public MovableObject {
 private:
     MapObject* target_cell;
@@ -109,6 +113,7 @@ public:
     bool checkTargetCell();
 };
 
+// Класс игры
 class Game {
 private:
     sf::Clock delta_clock;
