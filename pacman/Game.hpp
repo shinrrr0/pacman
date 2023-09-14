@@ -42,6 +42,7 @@ class MapObject : public DrawableObject {
 public:
     bool is_border_cell; // Принадлежит ли клетка рамке
     bool can_walk_trough; // Можно ли пройти через клетку
+    bool was_visited;
     std::vector<MapObject*> connected_with; // Вектор указателей на соседние клетки
     MapObject* previous; // Ссылка на предыдующую клетку
     int cost; // Цена перехода на эту клетку
@@ -54,6 +55,8 @@ public:
 // Вспомагательный класс, который хранит в себе: карту и вспомгательные функции
 class HelperClass {
 public:
+    int max_points;
+
     std::array<MapObject, (GRID_SIDE_X + 2)* (GRID_SIDE_Y + 2)> map{}; // Массив всех клеток
     std::vector<MapObject*> playable_tiles{}; // Вектор указателей на игровые клетки
     std::vector<MapObject*> border_tiles{}; // Вектор указателей на клетки рамки
@@ -75,6 +78,7 @@ public:
 // Классы двигающихся объектов
 class MovableObject : public DrawableObject {
 public:
+    int points;
     float speed; // Коэффицент скорости
     sf::Vector2i normalized_moving_vector; // Нормализованный вектор движения
     Direction direction; // Направление движения
@@ -123,6 +127,8 @@ public:
 // Класс игры
 class Game {
 private:
+    float delta_time;
+    float timer;
     sf::Clock delta_clock;
     sf::Font font;
 
@@ -131,15 +137,19 @@ private:
     void textInit();
 
 public:
-    float delta_time;
-    float timer;
+    int deaths = 0;
+    bool is_game_going = true;
     sf::RenderWindow window;
     HelperClass helper;
     MovableObject player;
     Ghost ghost;
     sf::Text text;
+    sf::Text win_text;
+    sf::Text lose_text;
+    sf::Text exit_text;
 
     Game();
+    void updatePoints(MovableObject& obj);
     void changeAnimationFrame(MovableObject& obj);
     void update();
     void inputHandler(sf::Keyboard::Key key_code);

@@ -5,6 +5,7 @@ MovableObject::MovableObject() : DrawableObject() {
     this->setMovingDirectionToNone();
     this->speed = 0;
     this->frame_index = 0;
+    this->points = 0;
 }
 
 // Назначение направления объекта по коду клавиши

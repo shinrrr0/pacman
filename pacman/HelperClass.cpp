@@ -130,6 +130,13 @@ HelperClass::HelperClass() {
         ++tile_n;
     }
 
+    for (MapObject* cell : playable_tiles) {
+        if (cell->can_walk_trough) {
+            cell->setTextureByPath("assets\\point.png");
+            max_points++;
+        }
+    }
+
     //Инициализация графа
     for (MapObject& cell : map) {
         if (cell.is_border_cell) {

@@ -23,8 +23,8 @@ void Game::windowInit() {
 // Инициализация объектов
 void Game::spritesInit() {
     // Инициализация игрока
-    this->player.setTextureByPath("assets\\f1.png");
-    this->player.setPosition((2 * TILE_SIDE_SIZE), (9 * TILE_SIDE_SIZE));
+    this->player.setTextureByPath("assets\\f2r.png");
+    this->player.setPosition((2 * TILE_SIDE_SIZE), (2 * TILE_SIDE_SIZE));
     this->player.speed = 20 * SPRITE_SCALE.x;
     this->player.helper = &(this->helper);
     this->player.defineCell();
@@ -63,7 +63,7 @@ void Game::spritesInit() {
     this->ghost.setTextureByPath("assets\\ghost1r.png");
     //this->ghost.setPosition((4 * TILE_SIDE_SIZE), (4 * TILE_SIDE_SIZE));
     //this->ghost.setPosition((10 * TILE_SIDE_SIZE), (3 * TILE_SIDE_SIZE));
-    this->ghost.setPosition((9 * TILE_SIDE_SIZE), (9 * TILE_SIDE_SIZE));
+    this->ghost.setPosition((13 * TILE_SIDE_SIZE), (11 * TILE_SIDE_SIZE));
     this->ghost.speed = 15 * SPRITE_SCALE.x;
     this->ghost.helper = &(this->helper);
     this->ghost.defineCell();
@@ -97,6 +97,30 @@ void Game::textInit() {
     this->text.setFont(this->font);
     this->text.setString("0 0");
     this->text.setCharacterSize(15 * SPRITE_SCALE.x);
+
+    this->win_text.setFont(this->font);
+    this->win_text.setString("YOU WIN!");
+    this->win_text.setCharacterSize(16 * SPRITE_SCALE.x);
+    this->win_text.setPosition((GRID_SIDE_X + 2) * TILE_SIDE_SIZE / 4, (GRID_SIDE_Y + 2) * TILE_SIDE_SIZE / 4);
+ 
+    this->lose_text.setFont(this->font);
+    this->lose_text.setString("YOU LOSE!");
+    this->lose_text.setCharacterSize(16 * SPRITE_SCALE.x);
+    this->lose_text.setPosition((GRID_SIDE_X + 2) * TILE_SIDE_SIZE / 4 - 30, (GRID_SIDE_Y + 2) * TILE_SIDE_SIZE / 4);
+
+    this->exit_text.setFont(this->font);
+    this->exit_text.setString("ESC to exit");
+    this->exit_text.setCharacterSize(10 * SPRITE_SCALE.x);
+    this->exit_text.setPosition((GRID_SIDE_X + 2) * TILE_SIDE_SIZE / 4 + 30, (GRID_SIDE_Y + 2) * TILE_SIDE_SIZE / 4 + 75);
+}
+
+void Game::updatePoints(MovableObject& obj) {
+    obj.defineCell();
+    if (!obj.current_cell->was_visited) {
+        obj.current_cell->was_visited = true;
+        obj.current_cell->setTextureByPath("assets\\empty.png");
+        obj.points++;
+    }
 }
 
 void Game::changeAnimationFrame(MovableObject& obj) {
