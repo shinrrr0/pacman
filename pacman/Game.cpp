@@ -23,20 +23,72 @@ void Game::windowInit() {
 // Инициализация объектов
 void Game::spritesInit() {
     // Инициализация игрока
-    this->player.setTextureByPath("assets\\f.png");
+    this->player.setTextureByPath("assets\\f1.png");
     this->player.setPosition((2 * TILE_SIDE_SIZE), (9 * TILE_SIDE_SIZE));
     this->player.speed = 20 * SPRITE_SCALE.x;
     this->player.helper = &(this->helper);
     this->player.defineCell();
+
+    this->player.frames_number = 4;
+
+    this->player.animation_sprites_u = new std::string[player.frames_number];
+    this->player.animation_sprites_u[0] = "assets\\f1.png";
+    this->player.animation_sprites_u[1] = "assets\\f2u.png";
+    this->player.animation_sprites_u[2] = "assets\\f3u.png";
+    this->player.animation_sprites_u[3] = "assets\\f2u.png";
+    this->player.animations[0] = &player.animation_sprites_u;
+
+    this->player.animation_sprites_r = new std::string[player.frames_number];
+    this->player.animation_sprites_r[0] = "assets\\f1.png";
+    this->player.animation_sprites_r[1] = "assets\\f2r.png";
+    this->player.animation_sprites_r[2] = "assets\\f3r.png";
+    this->player.animation_sprites_r[3] = "assets\\f2r.png";
+    this->player.animations[1] = &player.animation_sprites_r;
+
+    this->player.animation_sprites_b = new std::string[player.frames_number];
+    this->player.animation_sprites_b[0] = "assets\\f1.png";
+    this->player.animation_sprites_b[1] = "assets\\f2b.png";
+    this->player.animation_sprites_b[2] = "assets\\f3b.png";
+    this->player.animation_sprites_b[3] = "assets\\f2b.png";
+    this->player.animations[2] = &player.animation_sprites_b;
+
+    this->player.animation_sprites_l = new std::string[player.frames_number];
+    this->player.animation_sprites_l[0] = "assets\\f1.png";
+    this->player.animation_sprites_l[1] = "assets\\f2l.png";
+    this->player.animation_sprites_l[2] = "assets\\f3l.png";
+    this->player.animation_sprites_l[3] = "assets\\f2l.png";
+    this->player.animations[3] = &player.animation_sprites_l;
     
     // Инициализация приведения
-    this->ghost.setTextureByPath("assets\\ghost.png");
+    this->ghost.setTextureByPath("assets\\ghost1r.png");
     //this->ghost.setPosition((4 * TILE_SIDE_SIZE), (4 * TILE_SIDE_SIZE));
     //this->ghost.setPosition((10 * TILE_SIDE_SIZE), (3 * TILE_SIDE_SIZE));
     this->ghost.setPosition((9 * TILE_SIDE_SIZE), (9 * TILE_SIDE_SIZE));
     this->ghost.speed = 15 * SPRITE_SCALE.x;
     this->ghost.helper = &(this->helper);
     this->ghost.defineCell();
+
+    this->ghost.frames_number = 2;
+
+    this->ghost.animation_sprites_u = new std::string[ghost.frames_number];
+    this->ghost.animation_sprites_u[0] = "assets\\ghost1u.png";
+    this->ghost.animation_sprites_u[1] = "assets\\ghost2u.png";
+    this->ghost.animations[0] = &ghost.animation_sprites_u;
+
+    this->ghost.animation_sprites_r = new std::string[ghost.frames_number];
+    this->ghost.animation_sprites_r[0] = "assets\\ghost1r.png";
+    this->ghost.animation_sprites_r[1] = "assets\\ghost2r.png";
+    this->ghost.animations[1] = &ghost.animation_sprites_r;
+
+    this->ghost.animation_sprites_b = new std::string[ghost.frames_number];
+    this->ghost.animation_sprites_b[0] = "assets\\ghost1b.png";
+    this->ghost.animation_sprites_b[1] = "assets\\ghost2b.png";
+    this->ghost.animations[2] = &ghost.animation_sprites_b;
+
+    this->ghost.animation_sprites_l = new std::string[ghost.frames_number];
+    this->ghost.animation_sprites_l[0] = "assets\\ghost1l.png";
+    this->ghost.animation_sprites_l[1] = "assets\\ghost2l.png";
+    this->ghost.animations[3] = &ghost.animation_sprites_l;
 }
 
 // Инициализация текста
@@ -47,9 +99,28 @@ void Game::textInit() {
     this->text.setCharacterSize(15 * SPRITE_SCALE.x);
 }
 
+void Game::changeAnimationFrame(MovableObject& obj) {
+    if (static_cast<int>(obj.direction) == 0) {
+        return;
+    }
+    obj.setTextureByPath((*obj.animations[static_cast<int>(obj.direction)- 1])[obj.frame_index]);
+    if (obj.frame_index == obj.frames_number - 1) {
+        obj.frame_index = 0;
+    }
+    else {
+        obj.frame_index++;
+    }
+}
+
 // Обновление delta time
 void Game::update() {
     this->delta_time = delta_clock.restart().asSeconds();
+    this->timer += delta_time;
+    if (timer >= 0.1) {
+        changeAnimationFrame(player);
+        changeAnimationFrame(ghost);
+        timer = 0;
+    }
 }
 
 // Обработчик ввода
@@ -88,6 +159,7 @@ void Game::checkCollisions(MovableObject& obj) {
         if (obj.getGlobalBounds().intersects(cell->getGlobalBounds()) && !cell->can_walk_trough) {
             if (obj.direction == Direction::Up || obj.direction == Direction::Down) obj.setPosition(obj.getPosition().x, obj.current_cell->y * TILE_SIDE_SIZE);
             else obj.setPosition(obj.current_cell->x * TILE_SIDE_SIZE, obj.getPosition().y);
+            obj.setMovingDirectionToNone();
         }
     }
 }

@@ -80,7 +80,14 @@ public:
     Direction direction; // Направление движения
     MapObject* current_cell; // Указатель на текущую клетку
     HelperClass* helper; // Указатель на вспомагательный класс
-
+    
+    int frames_number;
+    int frame_index;
+    std::string** animations[4];
+    std::string* animation_sprites_u;
+    std::string* animation_sprites_r;
+    std::string* animation_sprites_b;
+    std::string* animation_sprites_l;
 
     MovableObject();
     void changeDirectionByInput(sf::Keyboard::Key key_code);
@@ -125,6 +132,7 @@ private:
 
 public:
     float delta_time;
+    float timer;
     sf::RenderWindow window;
     HelperClass helper;
     MovableObject player;
@@ -132,6 +140,7 @@ public:
     sf::Text text;
 
     Game();
+    void changeAnimationFrame(MovableObject& obj);
     void update();
     void inputHandler(sf::Keyboard::Key key_code);
     void moveInCurrentDirection(MovableObject& obj);
